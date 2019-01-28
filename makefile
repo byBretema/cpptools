@@ -8,7 +8,7 @@
                             # ################## #
 
 
-# $(VERBOSE).SILENT: # Uncomment this to avoid verbosity output
+$(VERBOSE).SILENT: # Un/comment this to avoid/allow verbosity output
 
 
 # ########################################################################### #
@@ -38,7 +38,7 @@
 
 # --- PROJECT NAME ---------------------------------------------------------- #
 
-PROJECT_NAME = Dac
+PROJECT_NAME = dac
 
 # --- MAKE SETTINGS --------------------------------------------------------- #
 
@@ -59,12 +59,13 @@ ICON_DIR      =
 
 BUILD_DIR     = build
 BIN_DIR       = bin
-INCL_DIR      = incl
-LIB_DIR       = .
 SOURCE_DIR    = src
 
-INCLUDES      = $(INCL_DIR:%=-I%)
-LIBS          = $(LIB_DIR:%=-L%)
+INCL_DIR      = incl
+LIB_DIR       =
+
+INCLUDES      = $(patsubst %,-I%,$(INCL_DIR) $(LIB_DIR))
+LIBS          = $(patsubst %,-L%,$(LIB_DIR))
 
 SOURCES       = $(wildcard $(SOURCE_DIR)/*.cpp)
 OBJECTS       = $(patsubst $(SOURCE_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(SOURCES))
@@ -76,10 +77,8 @@ default_target: debug
 
 # CLEAN
 clean:
-	-rm *.a
-	-rm *.exe
-	-rm -r $(BIN_DIR)/*
-	-rm -r $(BUILD_DIR)/*
+	-rm -rf $(BIN_DIR)/*
+	-rm -rf $(BUILD_DIR)/*
 
 # DEBUG
 debug: CXX_FLAGS += $(DEBUG_FLAGS)
@@ -91,10 +90,10 @@ release: $(PROJECT_NAME)
 
 #! STATIC LIB
 $(PROJECT_NAME): $(OBJECTS)
-	ar crvs lib$@.a $^
-	mkdir -p $(BIN_DIR)/$@
-	mv ./*.a ./$(BIN_DIR)
-	cp -r ./$(INCL_DIR)/* ./$(BIN_DIR)/$@
+	@ar crs lib$@.a $^
+	@mkdir -p $(BIN_DIR)/$@
+	@mv ./*.a ./$(BIN_DIR)
+	@cp -r ./$(INCL_DIR)/* ./$(BIN_DIR)/$@
 
 # #! EXECUTABLE
 # $(PROJECT_NAME): $(OBJECTS)

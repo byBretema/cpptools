@@ -3,13 +3,16 @@
 #include <string>
 #include <vector>
 
-namespace DAC { namespace Strings {
+namespace dac {
 
+class Strings {
+public:
   /// Get as std::string the content of a given file
-  std::string fromFile(const std::string& filePath);
+  static std::string fromFile(const std::string& filePath);
 
   /// split gives a vector with splitted strings
-  std::vector<std::string> split(const std::string& str,
-                                 const std::string& delimeter);
+  static std::vector<std::string> split(const std::string& str,
+                                        const std::string& delimeter);
+};
 
-}} // namespace DAC::Strings
+} // namespace dac

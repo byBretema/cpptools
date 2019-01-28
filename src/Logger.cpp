@@ -1,15 +1,29 @@
 #include "Logger.hpp"
 
-namespace DAC {
+namespace dac {
 
+// ====================================================================== //
+// ====================================================================== //
 // For avoid to user explicit call of init method.
+// ====================================================================== //
+
 std::once_flag Logger::m_once_init;
 
-// PATTERNS
-const char *Logger::m_patternPrints = "%v";
-const char *Logger::m_patternAlerts = "[%T] (%t @ %@) => %^%v%$";
 
-// DEFINE SHARED PTRs
+// ====================================================================== //
+// ====================================================================== //
+// Define patterns
+// ====================================================================== //
+
+const char* Logger::m_patternPrints = "%v";
+const char* Logger::m_patternAlerts = "[%T] (%t @ %@) => %^%v%$";
+
+
+// ====================================================================== //
+// ====================================================================== //
+// Define loggers
+// ====================================================================== //
+
 std::shared_ptr<spdlog::logger> Logger::m_info =
     spdlog::stdout_color_mt("INFO");
 std::shared_ptr<spdlog::logger> Logger::m_error =
@@ -17,25 +31,58 @@ std::shared_ptr<spdlog::logger> Logger::m_error =
 std::shared_ptr<spdlog::logger> Logger::m_print =
     spdlog::stdout_color_mt("PRINT");
 
-// "GETTERS"
-std::shared_ptr<spdlog::logger> &Logger::info() {
-  std::call_once(m_once_init, init);
-  return m_info;
-}
-std::shared_ptr<spdlog::logger> &Logger::error() {
-  std::call_once(m_once_init, init);
-  return m_error;
-}
-std::shared_ptr<spdlog::logger> &Logger::print() {
-  std::call_once(m_once_init, init);
-  return m_print;
-}
 
-// INIT: Just setup patterns for loggers
+// ====================================================================== //
+// ====================================================================== //
+// Initialization: Just setup the patterns
+// Its auto invoked from public methods
+// ====================================================================== //
+
 void Logger::init() {
   m_info->set_pattern(m_patternAlerts);
   m_error->set_pattern(m_patternAlerts);
   m_print->set_pattern(m_patternPrints);
 }
 
-} // namespace DAC
+
+
+// * ---  PUBLIC METHODS --- * //
+
+// ====================================================================== //
+// ====================================================================== //
+// Detailed print mehtod, w/ thread, line and file data
+// (NOTE: Output goes to stdout)
+// ====================================================================== //
+
+template <typename... Args>
+void info(const Args&... args) {
+  std::call_once(m_once_init, init);
+  SPDLOG_LOGGER_INFO(m_info, args...);
+}
+
+// ====================================================================== //
+// ====================================================================== //
+// Error alert method, w/ thread, line and file data
+// (NOTE: Output goes to stderr)
+// ====================================================================== //
+
+template <typename... Args>
+void err(const Args&... args) {
+  std::call_once(m_once_init, init);
+  SPDLOG_LOGGER_ERROR(m_error, args...);
+}
+
+// ====================================================================== //
+// ====================================================================== //
+// Print mehtod (NOTE: Output goes to stdout)
+// ====================================================================== //
+
+template <typename... Args>
+void print(const Args&... args) {
+  std::call_once(m_once_init, init);
+  SPDLOG_LOGGER_INFO(m_print, args...);
+}
+
+
+
+} // namespace dac

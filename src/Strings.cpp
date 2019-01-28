@@ -2,36 +2,36 @@
 
 #include <fstream>
 
-namespace DAC { namespace Strings {
+namespace dac {
 
-  /// Get as std::string the content of a given file
-  std::string fromFile(const std::string& filePath) {
-    auto stream  = std::ifstream(filePath);
-    using CharIt = std::istreambuf_iterator<char>;
-    return std::string(CharIt(stream), CharIt());
+/// Get as std::string the content of a given file
+std::string Strings::fromFile(const std::string& filePath) {
+  auto stream  = std::ifstream(filePath);
+  using CharIt = std::istreambuf_iterator<char>;
+  return std::string(CharIt(stream), CharIt());
+}
+
+/// split gives a vector with splitted strings
+std::vector<std::string> Strings::split(const std::string& str,
+                                        const std::string& delimeter) {
+  std::string              token;
+  std::vector<std::string> splitted;
+  size_t                   ini{ 0 }, end{ 0 };
+
+  // Split and store the string body
+  while ((end = str.find(delimeter, ini)) < str.size()) {
+    token = str.substr(ini, end - ini);
+    ini   = end + delimeter.size();
+    splitted.push_back(token);
   }
 
-  /// split gives a vector with splitted strings
-  std::vector<std::string> split(const std::string& str,
-                                 const std::string& delimeter) {
-    std::string              token;
-    std::vector<std::string> splitted;
-    size_t                   ini{ 0 }, end{ 0 };
-
-    // Split and store the string body
-    while ((end = str.find(delimeter, ini)) < str.size()) {
-      token = str.substr(ini, end - ini);
-      ini   = end + delimeter.size();
-      splitted.push_back(token);
-    }
-
-    // Store the string tail
-    if (ini < str.size()) {
-      token = str.substr(ini);
-      splitted.push_back(token);
-    }
-
-    return splitted;
+  // Store the string tail
+  if (ini < str.size()) {
+    token = str.substr(ini);
+    splitted.push_back(token);
   }
 
-}} // namespace DAC::Strings
+  return splitted;
+}
+
+} // namespace dac

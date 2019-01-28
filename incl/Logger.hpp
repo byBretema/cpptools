@@ -6,37 +6,41 @@
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 
-namespace DAC {
+namespace dac {
 
 class Logger {
 
 private:
-  // For avoid to user explicit call of init method.
+  // Initialization
+  static void           init();
   static std::once_flag m_once_init;
 
-  // PATTERNS
+  // Patterns
   static const char* m_patternPrints;
   static const char* m_patternAlerts;
 
-  // DECLARE SHARED PTRs
+  // Loggers
   static std::shared_ptr<spdlog::logger> m_info;
   static std::shared_ptr<spdlog::logger> m_error;
   static std::shared_ptr<spdlog::logger> m_print;
 
-public:
-  // "GETTERS"
-  static std::shared_ptr<spdlog::logger>& info();
-  static std::shared_ptr<spdlog::logger>& error();
-  static std::shared_ptr<spdlog::logger>& print();
 
-  // INIT: Just setup patterns for loggers
-  static void init();
+public:
+  // Detailed print mehtod, w/ thread, line and file data
+  // (NOTE: Output goes to stdout)
+  template <typename... Args>
+  static void info(const Args&... args);
+
+  // Error alert method, w/ thread, line and file data
+  // (NOTE: Output goes to stderr)
+  template <typename... Args>
+  static void err(const Args&... args);
+
+  // Print mehtod (NOTE: Output goes to stdout)
+  template <typename... Args>
+  static void print(const Args&... args);
 };
 
-} // namespace DAC
+} // namespace dac
 
-// Comfortable macros
-#define DacLog_INFO(...) SPDLOG_LOGGER_INFO(DAC::Logger::info(), __VA_ARGS__)
-#define DacLog_ERR(...) SPDLOG_LOGGER_ERROR(DAC::Logger::error(), __VA_ARGS__)
-#define DacLog_WARN(...) SPDLOG_LOGGER_WARN(DAC::Logger::error(), __VA_ARGS__)
-#define DacLog_PRINT(...) SPDLOG_LOGGER_INFO(DAC::Logger::print(), __VA_ARGS__)
+using dlog = dac::Logger;
