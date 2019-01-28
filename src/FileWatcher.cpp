@@ -9,6 +9,7 @@ namespace dac {
 // w/ default ctor the filewatcher is NOT launced directly
 // is needed to call "launchWatcher()" after define "path" and "callback"
 // ====================================================================== //
+
 FileWatcher::FileWatcher()
     : m_launched(false), m_threadLive(true), m_allowPrintInfo(true) {}
 
