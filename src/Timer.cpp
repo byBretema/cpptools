@@ -1,53 +1,38 @@
-#include "../incl/Logger.hpp"
+#include "../incl/Timer.hpp"
+#include "Logger.hpp"
 
 namespace dac {
 
 // ====================================================================== //
 // ====================================================================== //
-// Define loggers
+// Get a chrono time point
 // ====================================================================== //
 
-_LogType Logger::m_info  = spdlog::stdout_color_mt("INFO");
-_LogType Logger::m_error = spdlog::stderr_color_mt("ERROR");
-_LogType Logger::m_print = spdlog::stdout_color_mt("PRINT");
+TimePoint Timer::now() const { return StdClock::now(); };
 
 // ====================================================================== //
 // ====================================================================== //
-// Getter of info logger
+// Compute elapsed time
 // ====================================================================== //
 
-_LogType& Logger::info() {
-  static bool __logger_info_init = [&]() {
-    m_info->set_pattern(PATTERN_ALERT);
-    return true;
-  }();
-  return m_info;
-}
+double Timer::elapsedTime() const { return (now() - m_initTimeStamp).count(); }
 
 // ====================================================================== //
 // ====================================================================== //
-// Getter of error logger
+// Constructor
 // ====================================================================== //
 
-_LogType& Logger::error() {
-  static bool __logger_error_init = [&]() {
-    m_error->set_pattern(PATTERN_ALERT);
-    return true;
-  }();
-  return m_error;
-}
+Timer::Timer(const std::string& msg)
+    : m_promptMsg(msg), m_initTimeStamp(now()) {}
 
 // ====================================================================== //
 // ====================================================================== //
-// Getter of print logger
+// Destructor
 // ====================================================================== //
 
-_LogType& Logger::print() {
-  static bool __logger_print_init = [&]() {
-    m_print->set_pattern(PATTERN_PRINT);
-    return true;
-  }();
-  return m_print;
+Timer::~Timer() {
+  auto msg = (!m_promptMsg.empty()) ? " - " + m_promptMsg : "";
+  dInfo("[[{}]]{}", elapsedTime(), msg);
 }
 
 } // namespace dac

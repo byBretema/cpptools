@@ -8,16 +8,16 @@ namespace dac {
 
 class FileWatcher {
 
-  using filewatcherFn = std::function<void(std::fstream)>;
+  using filewatcherFn = std::function<void(std::fstream&)>;
 
 private:
   std::string       m_refContentStr;
   std::string       m_auxContentStr;
   std::stringstream m_auxContent;
 
+  bool m_verbose;
   bool m_launched;
   bool m_threadLive;
-  bool m_allowPrintInfo;
 
   std::string   m_path;
   filewatcherFn m_callback;
@@ -31,25 +31,22 @@ private:
 
 public:
   // w/ default ctor the filewatcher is NOT launced directly
-  // is needed to call "launchWatcher()" after define "path" and "callback"
+  // is needed to call "launch()" after define "path" and "callback"
   FileWatcher();
 
   // w/ param ctor the filewatcher is launced directly
-  // w/o call "launchWatcher()"
+  // w/o call "launch()"
   FileWatcher(const std::string& filepath, const filewatcherFn& callback,
-              bool allowPrintInfo = true);
+              bool verbose = false);
 
   // Destroy the object and kill thread dependent of this object
   ~FileWatcher();
 
   // Launch the thread to active filewatcher
-  void launchWatcher();
+  bool launch(const std::string& path, const filewatcherFn& fn);
 
-  // Set the file path to watch
-  void path(const std::string& path);
-
-  // Set the function to run on file change
-  void callback(const filewatcherFn& fn);
+  // Setter for verbose
+  void verbose(bool newState);
 };
 
 } // namespace dac

@@ -1,29 +1,29 @@
-#include "FileWatcher.hpp"
-#include "Async.hpp"
-#include "Logger.hpp"
+#include "../incl/FileWatcher.hpp"
+#include "../incl/Async.hpp"
+#include "../incl/Logger.hpp"
 
 namespace dac {
 
 // ====================================================================== //
 // ====================================================================== //
 // w/ default ctor the filewatcher is NOT launced directly
-// is needed to call "launchWatcher()" after define "path" and "callback"
+// is needed to call "launch()" after define "path" and "callback"
 // ====================================================================== //
 
 FileWatcher::FileWatcher()
-    : m_launched(false), m_threadLive(true), m_allowPrintInfo(true) {}
+    : m_launched(false), m_threadLive(true), m_verbose(false) {}
 
 // ====================================================================== //
 // ====================================================================== //
 // w/ param ctor the filewatcher is launced directly
-// w/o call "launchWatcher()"
+// w/o call "launch()"
 // ====================================================================== //
 
 FileWatcher::FileWatcher(const std::string&   filepath,
-                         const filewatcherFn& callback, bool allowPrintInfo)
-    : m_launched(false), m_threadLive(true), m_allowPrintInfo(allowPrintInfo),
-      m_path(filepath), m_callback(callback) {
-  launchWatcher();
+                         const filewatcherFn& callback, bool verbose)
+    : m_launched(false), m_threadLive(true), m_verbose(verbose), m_path(""),
+      m_callback(nullptr) {
+  launch(filepath, callback);
 }
 
 // ====================================================================== //
@@ -33,7 +33,7 @@ FileWatcher::FileWatcher(const std::string&   filepath,
 
 FileWatcher::~FileWatcher() {
   m_threadLive = false;
-  if (m_allowPrintInfo) { dlog::info("FileWatcher destroyed @ '{}'", m_path); }
+  if (m_verbose) { dInfo("FileWatcher destroyed @ '{}'", m_path); }
 }
 
 
@@ -62,7 +62,10 @@ bool FileWatcher::fileHasBeenModified() {
 // ====================================================================== //
 
 void FileWatcher::update() {
-  if (fileHasBeenModified()) { m_callback(std::fstream(m_path)); }
+  if (fileHasBeenModified()) {
+    std::fstream fs(m_path);
+    m_callback(fs);
+  }
 }
 
 // ====================================================================== //
@@ -70,36 +73,37 @@ void FileWatcher::update() {
 // Launch the thread to active filewatcher
 // ====================================================================== //
 
-void FileWatcher::launchWatcher() {
+bool FileWatcher::launch(const std::string& path, const filewatcherFn& fn) {
 
-  if (m_launched) { dlog::err("FileWatcher already active @ '{}'", m_path); }
-
-  if (m_path == "" && m_callback == nullptr) {
-    dlog::err("Empty callback @ '{}' FileWatcher");
-    return;
+  if (m_launched) {
+    dErr("FileWatcher already active @ '{}'", m_path);
+    return true;
+  }
+  if (path == "") {
+    dErr("Undefined path @ FileWatcher");
+    return false;
+  }
+  if (fn == nullptr) {
+    dErr("Empty callback @ '{}' FileWatcher", m_path);
+    return false;
   }
 
+  m_path       = path;
+  m_callback   = fn;
   m_threadLive = true;
+
   Async::periodic(0.5f, &m_threadLive, [&]() { update(); });
   m_launched = true;
 
-  if (m_allowPrintInfo) { dlog::info("FileWatcher created @ '{}'", m_path); }
+  if (m_verbose) { dInfo("FileWatcher created @ '{}'", m_path); }
+  return true;
 }
 
 // ====================================================================== //
 // ====================================================================== //
-// Set the file path to watch
+// Setter for verbose
 // ====================================================================== //
 
-void FileWatcher::path(const std::string& path) { m_path = path; }
-
-// ====================================================================== //
-// ====================================================================== //
-// Set the function to run on file change
-// ====================================================================== //
-
-void FileWatcher::callback(const filewatcherFn& fn) { m_callback = fn; }
-
-
+void FileWatcher::verbose(bool newState) { m_verbose = newState; }
 
 } // namespace dac

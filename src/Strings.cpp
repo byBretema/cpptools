@@ -1,4 +1,4 @@
-#include "Strings.hpp"
+#include "../incl/Strings.hpp"
 
 #include <fstream>
 

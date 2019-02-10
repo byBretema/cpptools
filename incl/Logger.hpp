@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mutex>
 #include <memory>
 
 #include "spdlog/spdlog.h"
@@ -8,39 +7,36 @@
 
 namespace dac {
 
+typedef std::shared_ptr<spdlog::logger> _LogType;
+
 class Logger {
 
-private:
-  // Initialization
-  static void           init();
-  static std::once_flag m_once_init;
+#define PATTERN_PRINT "%v"
+#define PATTERN_ALERT "[%T] (%t @ %@) => %^%v%$"
 
+private:
   // Patterns
   static const char* m_patternPrints;
   static const char* m_patternAlerts;
 
   // Loggers
-  static std::shared_ptr<spdlog::logger> m_info;
-  static std::shared_ptr<spdlog::logger> m_error;
-  static std::shared_ptr<spdlog::logger> m_print;
+  static _LogType m_info;
+  static _LogType m_error;
+  static _LogType m_print;
 
 
 public:
-  // Detailed print mehtod, w/ thread, line and file data
-  // (NOTE: Output goes to stdout)
-  template <typename... Args>
-  static void info(const Args&... args);
-
-  // Error alert method, w/ thread, line and file data
-  // (NOTE: Output goes to stderr)
-  template <typename... Args>
-  static void err(const Args&... args);
-
-  // Print mehtod (NOTE: Output goes to stdout)
-  template <typename... Args>
-  static void print(const Args&... args);
+  // Getter of info logger
+  static _LogType& info();
+  // Getter of error logger
+  static _LogType& error();
+  // Getter of print logger
+  static _LogType& print();
 };
 
 } // namespace dac
 
-using dlog = dac::Logger;
+
+#define dInfo(...) SPDLOG_LOGGER_INFO(dac::Logger::info(), __VA_ARGS__);
+#define dErr(...) SPDLOG_LOGGER_ERROR(dac::Logger::error(), __VA_ARGS__);
+#define dPrint(...) SPDLOG_LOGGER_INFO(dac::Logger::print(), __VA_ARGS__);
