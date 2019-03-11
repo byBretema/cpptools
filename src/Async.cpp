@@ -13,11 +13,13 @@ void Async::_periodic(const floatFn& timeFn, bool* threadFlag,
                       const asyncFn& func) {
   try {
     while (*threadFlag) {
-      func();
+      try {
+        func();
+      } catch (std::exception&) { dInfo("Fail on thread func execution.") }
       std::this_thread::sleep_for(std::chrono::duration<float>(timeFn()));
     }
-    dInfo("THREAD DIE pointedly :)");
-  } catch (std::exception&) { dInfo("THREAD DIE by exception :("); }
+    dInfo("Pointedly die.");
+  } catch (std::exception&) { dInfo("Death by exception."); }
 }
 
 // ====================================================================== //
