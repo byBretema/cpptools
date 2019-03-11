@@ -9,13 +9,15 @@ namespace dac {
 // Runs a function fn each wait time until flag is false;
 // ====================================================================== //
 
-void Async::_periodic(float sleepTime, bool* threadFlag, const asyncFn& func) {
+void Async::_periodic(const floatFn& timeFn, bool* threadFlag,
+                      const asyncFn& func) {
   try {
     while (*threadFlag) {
       func();
-      std::this_thread::sleep_for(std::chrono::duration<float>(sleepTime));
+      std::this_thread::sleep_for(std::chrono::duration<float>(timeFn()));
     }
-  } catch (std::exception&) { dInfo("THREAD DIE!"); }
+    dInfo("THREAD DIE pointedly :)");
+  } catch (std::exception&) { dInfo("THREAD DIE by exception :("); }
 }
 
 // ====================================================================== //
@@ -23,8 +25,9 @@ void Async::_periodic(float sleepTime, bool* threadFlag, const asyncFn& func) {
 // Periodic function wrapper that runs it in a separated thead
 // ====================================================================== //
 
-void Async::periodic(float sleepTime, bool* threadFlag, const asyncFn& func) {
-  std::thread(_periodic, sleepTime, threadFlag, func).detach();
+void Async::periodic(const floatFn& timeFn, bool* threadFlag,
+                     const asyncFn& func) {
+  std::thread(_periodic, timeFn, threadFlag, func).detach();
 }
 
 } // namespace dac

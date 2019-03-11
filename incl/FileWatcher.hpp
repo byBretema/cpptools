@@ -11,9 +11,7 @@ class FileWatcher {
   using filewatcherFn = std::function<void(std::fstream&)>;
 
 private:
-  std::string       m_refContentStr;
-  std::string       m_auxContentStr;
-  std::stringstream m_auxContent;
+  std::string m_refContentStr;
 
   bool m_verbose;
   bool m_launched;

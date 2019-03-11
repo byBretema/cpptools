@@ -11,7 +11,7 @@ namespace dac {
 // ====================================================================== //
 
 FileWatcher::FileWatcher()
-    : m_launched(false), m_threadLive(true), m_verbose(false) {}
+    : m_verbose(false), m_launched(false), m_threadLive(true) {}
 
 // ====================================================================== //
 // ====================================================================== //
@@ -21,7 +21,7 @@ FileWatcher::FileWatcher()
 
 FileWatcher::FileWatcher(const std::string&   filepath,
                          const filewatcherFn& callback, bool verbose)
-    : m_launched(false), m_threadLive(true), m_verbose(verbose), m_path(""),
+    : m_verbose(verbose), m_launched(false), m_threadLive(true), m_path(""),
       m_callback(nullptr) {
   launch(filepath, callback);
 }
@@ -46,9 +46,9 @@ bool FileWatcher::fileHasBeenModified() {
   std::fstream f(m_path);
 
   // Get stream as string
-  m_auxContent.clear();
+  std::stringstream m_auxContent;
   m_auxContent << f.rdbuf();
-  m_auxContentStr = m_auxContent.str();
+  std::string m_auxContentStr = m_auxContent.str();
 
   bool modified = m_refContentStr != m_auxContentStr;
   // Avoid copy if not needed
@@ -92,7 +92,7 @@ bool FileWatcher::launch(const std::string& path, const filewatcherFn& fn) {
   m_callback   = fn;
   m_threadLive = true;
 
-  Async::periodic(0.5f, &m_threadLive, [&]() { update(); });
+  Async::periodic([]() { return 0.5f; }, &m_threadLive, [&]() { update(); });
   m_launched = true;
 
   if (m_verbose) { dInfo("FileWatcher created @ '{}'", m_path); }

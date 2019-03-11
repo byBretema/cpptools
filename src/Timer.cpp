@@ -32,7 +32,7 @@ Timer::Timer(const std::string& msg)
 
 Timer::~Timer() {
   auto msg = (!m_promptMsg.empty()) ? " - " + m_promptMsg : "";
-  dInfo("[[{}]]{}", elapsedTime(), msg);
+  dInfo("[[{}s]]{}", elapsedTime(), msg);
 }
 
 } // namespace dac

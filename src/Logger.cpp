@@ -1,5 +1,7 @@
 #include "../incl/Logger.hpp"
 
+#include <mutex>
+
 namespace dac {
 
 // ====================================================================== //
@@ -17,10 +19,8 @@ _LogType Logger::m_print = spdlog::stdout_color_mt("PRINT");
 // ====================================================================== //
 
 _LogType& Logger::info() {
-  static bool __logger_info_init = [&]() {
-    m_info->set_pattern(PATTERN_ALERT);
-    return true;
-  }();
+  static std::once_flag infoOnceFlag;
+  std::call_once(infoOnceFlag, [&]() { m_info->set_pattern(PATTERN_ALERT); });
   return m_info;
 }
 
@@ -30,10 +30,8 @@ _LogType& Logger::info() {
 // ====================================================================== //
 
 _LogType& Logger::error() {
-  static bool __logger_error_init = [&]() {
-    m_error->set_pattern(PATTERN_ALERT);
-    return true;
-  }();
+  static std::once_flag errorOnceFlag;
+  std::call_once(errorOnceFlag, [&]() { m_error->set_pattern(PATTERN_ALERT); });
   return m_error;
 }
 
@@ -43,10 +41,8 @@ _LogType& Logger::error() {
 // ====================================================================== //
 
 _LogType& Logger::print() {
-  static bool __logger_print_init = [&]() {
-    m_print->set_pattern(PATTERN_PRINT);
-    return true;
-  }();
+  static std::once_flag printOnceFlag;
+  std::call_once(printOnceFlag, [&]() { m_print->set_pattern(PATTERN_PRINT); });
   return m_print;
 }
 
